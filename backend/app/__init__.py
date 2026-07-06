@@ -1,0 +1,1 @@
+"""GridOps Copilot backend application."""
