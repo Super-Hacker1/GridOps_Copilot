@@ -1,0 +1,6 @@
+asset_id,timestamp,voltage,current,temperature,status,alarm_code
+CB-402,2026-01-10T09:00:00Z,400.8,510,42,closed,NONE
+CB-402,2026-01-10T09:04:30Z,399.6,548,47,closed,BRK_OPERATION_DELAY
+TX-1,2026-01-10T09:05:00Z,221.5,690,67,energized,NONE
+TX-1,2026-01-10T09:12:00Z,219.7,725,74,energized,TX_TEMP_WARN
+LINE-220-A,2026-01-10T09:15:00Z,220.2,410,39,energized,NONE

@@ -1,0 +1,5 @@
+asset_id,date,issue,action_taken,severity,next_due_date
+CB-402,2025-10-12,contact resistance trending upward,cleaned auxiliary contacts,medium,2026-01-20
+CB-402,2025-12-05,slow close timing observed,retest scheduled,high,2026-01-15
+TX-1,2025-09-18,minor oil temperature excursion,cooling fan inspection,medium,2026-02-01
+TX-1,2025-11-22,FRA comparison requested after through fault,engineering review,high,2026-01-25

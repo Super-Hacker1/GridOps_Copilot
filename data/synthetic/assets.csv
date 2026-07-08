@@ -1,0 +1,4 @@
+asset_id,asset_type,voltage_level,manufacturer,age_years,criticality
+CB-402,circuit_breaker,400kV,GridSwitch,18,high
+TX-1,transformer,400/220kV,VoltCore,22,critical
+LINE-220-A,transmission_line,220kV,GridLine,14,medium
