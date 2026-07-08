@@ -10,3 +10,5 @@ node_modules/
 .next/
 dist/
 *.egg-info/
+.ipynb_checkpoints/
+docs/handoff/
