@@ -1,16 +1,11 @@
 """FastAPI application entry point."""
 
 from fastapi import FastAPI
+from app.api.routes_health import router as health_router
 
 app = FastAPI(
     title="GridOps Copilot App",
     version="0.1.0",
 )
 
-
-@app.get("/health", tags=["system"])
-async def health() -> dict[str, str]:
-    return {
-        "status": "ok",
-        "service": "gridops_copilot",
-    }
+app.include_router(health_router)
