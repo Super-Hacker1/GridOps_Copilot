@@ -1,0 +1,6 @@
+asset_id,date,issue,action_taken,severity,next_due_date
+CB-402,2025-11-12,Elevated dynamic contact resistance,Contacts cleaned and DCRM repeated,high,2026-06-15
+CB-401,2026-01-18,Routine breaker inspection,No corrective action required,low,2027-01-18
+TX-1,2026-02-20,Minor FRA baseline deviation,Engineering review requested,medium,2026-08-20
+TX-2,2026-03-10,Routine oil and thermal inspection,No abnormal condition found,low,2027-03-10
+CB-221,2026-04-05,Operating mechanism lubrication,Mechanism cleaned and lubricated,medium,2027-04-05

@@ -1,4 +1,6 @@
-asset_id,asset_type,voltage_level,manufacturer,age_years,criticality
-CB-402,circuit_breaker,400kV,GridSwitch,18,high
-TX-1,transformer,400/220kV,VoltCore,22,critical
-LINE-220-A,transmission_line,220kV,GridLine,14,medium
+asset_id,asset_type,voltage_level,manufacturer,age_years,criticality,bus_group,connected_to
+TX-1,transformer,400 kV,Hitachi Energy,18,critical,400_kv_bus,400_kv_bus
+CB-401,circuit_breaker,400 kV,Siemens Energy,10,high,400_kv_bus,TX-1
+CB-402,circuit_breaker,400 kV,GE Vernova,16,critical,400_kv_bus,TX-1
+TX-2,transformer,220 kV,BHEL,12,high,220_kv_bus,220_kv_bus
+CB-221,circuit_breaker,220 kV,ABB,8,medium,220_kv_bus,TX-2
