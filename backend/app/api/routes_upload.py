@@ -1,4 +1,4 @@
-"""Diagnostic-file upload API routes"""
+"""Diagnostic-file upload API routes."""
 
 from typing import Annotated
 from fastapi import (
@@ -11,13 +11,12 @@ from fastapi import (
 )
 
 from app.agents.ingestion_agent import ingest_csv
+from app.config import get_settings
 from app.schemas.upload import UploadResponse
-from app.storage.json_store import (
-    JsonUploadStore,
-    default_upload_store,
-)
+from app.storage.json_store import JsonUploadStore
 
 MAX_UPLOAD_SIZE_BYTES = 10 * 1024 * 1024
+UPLOAD_READ_CHUNK_BYTES = 1024 * 1024
 
 router = APIRouter(
     prefix="/api",
@@ -25,9 +24,25 @@ router = APIRouter(
 )
 
 
-def get_upload_store() -> JsonUploadStore:
+async def get_upload_store() -> JsonUploadStore:
     """Return the application's upload store."""
-    return default_upload_store
+
+    return JsonUploadStore(get_settings().upload_directory)
+
+
+async def _read_limited_upload(file: UploadFile) -> bytes:
+    if file.size is not None and file.size > MAX_UPLOAD_SIZE_BYTES:
+        raise HTTPException(status_code=413, detail="Uploaded file exceeds the 10 MB limit")
+
+    content = bytearray()
+    while chunk := await file.read(UPLOAD_READ_CHUNK_BYTES):
+        content.extend(chunk)
+        if len(content) > MAX_UPLOAD_SIZE_BYTES:
+            raise HTTPException(
+                status_code=413,
+                detail="Uploaded file exceeds the 10 MB limit",
+            )
+    return bytes(content)
 
 
 @router.post(
@@ -40,12 +55,9 @@ async def upload_diagnostic_file(
     store: Annotated[JsonUploadStore, Depends(get_upload_store)],
     asset_id: Annotated[str | None, Form()] = None,
 ) -> UploadResponse:
-    """Validate normalize, and persist a diagnostic CSV"""
+    """Validate, normalize, and persist a diagnostic CSV."""
 
-    content = await file.read()
-
-    if len(content) > MAX_UPLOAD_SIZE_BYTES:
-        raise HTTPException(status_code=413, detail="Uploaded file exceeds the 10 MB limit")
+    content = await _read_limited_upload(file)
     try:
         result = ingest_csv(
             content,

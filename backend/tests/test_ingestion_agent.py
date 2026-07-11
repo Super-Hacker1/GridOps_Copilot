@@ -194,3 +194,36 @@ def test_ingestion_result_exposes_validated_frame(
     assert isinstance(result.frame, pd.DataFrame)
     assert result.row_count == 512
     assert result.warnings == ()
+
+
+def test_ingest_csv_rejects_blank_asset_identifier() -> None:
+    content = (
+        b"asset_id,asset_type,voltage_level,manufacturer,age_years,criticality,"
+        b"bus_group,connected_to\n"
+        b"   ,transformer,400 kV,Demo,10,critical,400kV Bus,BUS-400\n"
+    )
+
+    with pytest.raises(ValueError, match="Asset identifiers must not be blank"):
+        ingestion_agent.ingest_csv(content, declared_type="assets")
+
+
+def test_ingest_csv_rejects_invalid_diagnostic_timestamp() -> None:
+    content = (
+        b"transformer_id,timestamp,frequency_hz,magnitude_db,phase_deg,winding,label\n"
+        b"TX-1,not-a-date,10,-1,-2,HV,healthy\n"
+        b"TX-1,not-a-date,100,-2,-3,HV,healthy\n"
+    )
+
+    with pytest.raises(ValueError, match="timestamp must contain valid dates"):
+        ingestion_agent.ingest_csv(content, declared_type="fra")
+
+
+def test_ingest_csv_rejects_non_positive_fra_frequency() -> None:
+    content = (
+        b"transformer_id,timestamp,frequency_hz,magnitude_db,phase_deg,winding,label\n"
+        b"TX-1,2026-07-08T10:00:00Z,0,-1,-2,HV,healthy\n"
+        b"TX-1,2026-07-08T10:00:00Z,100,-2,-3,HV,healthy\n"
+    )
+
+    with pytest.raises(ValueError, match="FRA frequency_hz must be greater than zero"):
+        ingestion_agent.ingest_csv(content, declared_type="fra")

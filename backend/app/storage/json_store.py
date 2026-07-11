@@ -84,13 +84,9 @@ class JsonUploadStore:
         metadata_path = self.root_directory / f"{upload_id}.json"
 
         if not metadata_path.is_file():
-            raise FileNotFoundError(
-                f"Upload metadata not found: {upload_id}"
-            )
+            raise FileNotFoundError(f"Upload metadata not found: {upload_id}")
 
-        return json.loads(
-            metadata_path.read_text(encoding="utf-8")
-        )
+        return json.loads(metadata_path.read_text(encoding="utf-8"))
 
     def load_frame(self, upload_id: str) -> pd.DataFrame:
         self._validate_upload_id(upload_id)
@@ -98,9 +94,7 @@ class JsonUploadStore:
         csv_path = self.root_directory / f"{upload_id}.csv"
 
         if not csv_path.is_file():
-            raise FileNotFoundError(
-                f"Upload data not found: {upload_id}"
-            )
+            raise FileNotFoundError(f"Upload data not found: {upload_id}")
 
         return pd.read_csv(csv_path)
 
@@ -108,10 +102,3 @@ class JsonUploadStore:
     def _validate_upload_id(upload_id: str) -> None:
         if UPLOAD_ID_PATTERN.fullmatch(upload_id) is None:
             raise ValueError(f"Invalid upload ID: {upload_id}")
-
-
-PROJECT_ROOT = Path(__file__).resolve().parents[3]
-
-default_upload_store = JsonUploadStore(
-    PROJECT_ROOT / "data" / "runtime" / "uploads"
-)

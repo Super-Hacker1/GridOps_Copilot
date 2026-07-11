@@ -95,6 +95,14 @@ ASSET_ID_COLUMNS: dict[FileType, str] = {
     "assets": "asset_id",
 }
 
+DATE_COLUMNS: dict[FileType, tuple[str, ...]] = {
+    "fra": ("timestamp",),
+    "dcrm": ("timestamp",),
+    "scada": ("timestamp",),
+    "maintenance": ("date", "next_due_date"),
+    "assets": (),
+}
+
 COLUMN_ALIASES = {
     "voltage": "voltage_kv",
     "current": "current_a",
@@ -270,12 +278,26 @@ def _validate_waveform_order(
             )
 
 
+def _validate_date_columns(frame: pd.DataFrame, file_type: FileType) -> None:
+    for column in DATE_COLUMNS[file_type]:
+        parsed = pd.to_datetime(frame[column], utc=True, errors="coerce", format="mixed")
+        if parsed.isna().any():
+            raise ValueError(f"{column} must contain valid dates")
+
+
+def _validate_domain_values(frame: pd.DataFrame, file_type: FileType) -> None:
+    if file_type == "fra" and frame["frequency_hz"].le(0).any():
+        raise ValueError("FRA frequency_hz must be greater than zero")
+
+
 def _extract_asset_ids(
     frame: pd.DataFrame,
     file_type: FileType,
 ) -> tuple[str, ...]:
     column = ASSET_ID_COLUMNS[file_type]
     values = frame[column].astype(str).str.strip()
+    if values.eq("").any():
+        raise ValueError("Asset identifiers must not be blank")
     return tuple(sorted(values.unique()))
 
 
@@ -293,6 +315,8 @@ def ingest_csv(
 
     _validate_required_values(frame, file_type)
     _convert_numeric_columns(frame, file_type)
+    _validate_date_columns(frame, file_type)
+    _validate_domain_values(frame, file_type)
     _validate_waveform_order(frame, file_type)
 
     recommended_rows = MINIMUM_RECOMMENDED_ROWS[file_type]

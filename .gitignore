@@ -5,10 +5,15 @@ __pycache__/
 .ruff_cache/
 .env
 coverage.xml
+.coverage
 htmlcov/
 node_modules/
 .next/
 dist/
+build/
 *.egg-info/
 .ipynb_checkpoints/
 docs/handoff/
+data/runtime/
+reports/generated/
+models/fra_cnn_local_smoke.pt

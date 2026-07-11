@@ -3,8 +3,11 @@
 from pathlib import Path
 import pytest
 from httpx2 import ASGITransport, AsyncClient
+from starlette.datastructures import UploadFile as StarletteUploadFile
 
+from app.api import routes_upload
 from app.api.routes_upload import get_upload_store
+from app.config import Settings
 from app.main import app
 from app.services import synthetic_data
 from app.storage.json_store import JsonUploadStore
@@ -30,7 +33,10 @@ def upload_store(tmp_path: Path) -> JsonUploadStore:
 
 @pytest.fixture(autouse=True)
 def override_upload_store(upload_store: JsonUploadStore):
-    app.dependency_overrides[get_upload_store] = lambda: upload_store
+    async def override() -> JsonUploadStore:
+        return upload_store
+
+    app.dependency_overrides[get_upload_store] = override
     yield
     app.dependency_overrides.pop(get_upload_store, None)
 
@@ -171,7 +177,7 @@ async def test_upload_rejects_invalid_csv_schema() -> None:
 
 
 @pytest.mark.anyio
-async def test_upload_rejects_unspupported_file_type(
+async def test_upload_rejects_unsupported_file_type(
     generated_files: dict[str, Path],
 ) -> None:
     response = await post_upload(
@@ -181,3 +187,45 @@ async def test_upload_rejects_unspupported_file_type(
     )
     assert response.status_code == 400
     assert "Unsupported declared_type" in response.json()["detail"]
+
+
+@pytest.mark.anyio
+async def test_upload_store_uses_configured_runtime_directory(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    configured_directory = tmp_path / "configured-uploads"
+    monkeypatch.setattr(
+        routes_upload,
+        "get_settings",
+        lambda: Settings(upload_directory=configured_directory),
+        raising=False,
+    )
+
+    store = await get_upload_store()
+
+    assert store.root_directory == configured_directory
+
+
+@pytest.mark.anyio
+async def test_upload_reads_file_in_bounded_chunks(
+    generated_files: dict[str, Path],
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    read_sizes: list[int] = []
+    original_read = StarletteUploadFile.read
+
+    async def tracked_read(upload, size: int = -1):
+        read_sizes.append(size)
+        return await original_read(upload, size)
+
+    monkeypatch.setattr(StarletteUploadFile, "read", tracked_read)
+    response = await post_upload(
+        filename="fra_healthy.csv",
+        content=generated_files["fra_healthy.csv"].read_bytes(),
+        file_type="fra",
+    )
+
+    assert response.status_code == 200
+    assert read_sizes
+    assert -1 not in read_sizes

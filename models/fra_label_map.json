@@ -1,0 +1,7 @@
+{
+  "0": "healthy",
+  "1": "winding_deformation_suspected",
+  "2": "core_clamping_issue_suspected",
+  "3": "insulation_related_abnormality_suspected",
+  "4": "needs_human_review"
+}

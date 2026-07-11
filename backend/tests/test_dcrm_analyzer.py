@@ -79,6 +79,65 @@ def test_analyze_dcrm_detects_mechanism_delay() -> None:
     assert result.evidence == ["Operation duration is 30.0% above baseline (13.00 vs 10.00 ms)."]
 
 
+def test_analyze_dcrm_rejects_flat_travel_as_mechanism_issue() -> None:
+    baseline = make_waveform(
+        [0.0, 5.0, 10.0],
+        [100.0, 100.0, 100.0],
+    )
+    current = make_waveform(
+        [0.0, 5.0, 10.0],
+        [100.0, 100.0, 100.0],
+    )
+    current["travel_mm"] = [0.0, 0.0, 0.0]
+
+    result = dcrm_analyzer.analyze_dcrm(current, baseline)
+
+    assert result.is_anomalous is True
+    assert "mechanism_delay" in result.anomaly_types
+    assert "possible_operating_mechanism_issue" in result.likely_faults
+    assert result.metrics["travel_completion_deviation_pct"] == pytest.approx(100.0)
+    assert any("travel" in item.lower() for item in result.evidence)
+
+
+def test_analyze_dcrm_detects_late_travel_with_normal_waveform_duration() -> None:
+    baseline = make_waveform(
+        [0.0, 5.0, 10.0],
+        [100.0, 100.0, 100.0],
+    )
+    current = make_waveform(
+        [0.0, 5.0, 10.0],
+        [100.0, 100.0, 100.0],
+    )
+    current["travel_mm"] = [0.0, 0.0, 10.0]
+
+    result = dcrm_analyzer.analyze_dcrm(current, baseline)
+
+    assert result.is_anomalous is True
+    assert "mechanism_delay" in result.anomaly_types
+    assert result.metrics["travel_midpoint_delay_pct"] == pytest.approx(100.0)
+    assert any("travel midpoint" in item.lower() for item in result.evidence)
+
+
+def test_analyze_dcrm_detects_abnormal_coil_current() -> None:
+    baseline = make_waveform(
+        [0.0, 5.0, 10.0],
+        [100.0, 100.0, 100.0],
+    )
+    current = make_waveform(
+        [0.0, 5.0, 10.0],
+        [100.0, 100.0, 100.0],
+    )
+    current["coil_current_a"] = [0.0, 3.0, 0.5]
+
+    result = dcrm_analyzer.analyze_dcrm(current, baseline)
+
+    assert result.is_anomalous is True
+    assert "abnormal_coil_current" in result.anomaly_types
+    assert "possible_operating_mechanism_issue" in result.likely_faults
+    assert result.metrics["coil_peak_absolute_deviation_pct"] == pytest.approx(100.0)
+    assert any("coil current" in item.lower() for item in result.evidence)
+
+
 def test_analyze_dcrm_can_report_multiple_anomalies() -> None:
     baseline = make_waveform(
         [0.0, 5.0, 10.0],
