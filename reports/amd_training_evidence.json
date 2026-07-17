@@ -1,0 +1,158 @@
+{
+  "status": "complete",
+  "amd_usage_claim": "FRA model trained and benchmarked on an AMD GPU using ROCm PyTorch.",
+  "generated_at": "2026-07-11T11:24:13.443406+00:00",
+  "training_platform": "AMD AI Notebooks / AMD Developer Cloud",
+  "framework": "PyTorch ROCm",
+  "torch_version": "2.9.1+gitff65f5b",
+  "hip_version": "7.2.53211-e1a6bc5663",
+  "gpu_available": true,
+  "amd_rocm_verified": true,
+  "device_name": "AMD gfx1100 GPU (PCI 1002:744b; 96 compute units)",
+  "model_artifact": "models/fra_cnn_rocm.pt",
+  "artifact_sha256": "3bcac0c65d3729b31271d2048c2b9c52411f088f94991c22f2db8bd4df1cd633",
+  "label_map": "models/fra_label_map.json",
+  "dataset": {
+    "source": "data/synthetic canonical FRA curves expanded into seeded scenario prototypes with repeated sensor-noise observations",
+    "samples": 240,
+    "scenario_groups": 60,
+    "scenarios_per_class": 12,
+    "observations_per_scenario": 4,
+    "sequence_length": 256,
+    "input_channels": [
+      "log_frequency_hz",
+      "magnitude_db",
+      "phase_deg"
+    ],
+    "classes": [
+      "healthy",
+      "winding_deformation_suspected",
+      "core_clamping_issue_suspected",
+      "insulation_related_abnormality_suspected",
+      "needs_human_review"
+    ],
+    "seed": 42,
+    "split_strategy": "two-stage stratified split over unique scenario/prototype IDs; no group crosses train, validation, or test",
+    "split_group_counts": {
+      "train": 40,
+      "validation": 10,
+      "test": 10
+    },
+    "field_validated": false,
+    "field_generalization_claimed": false
+  },
+  "training": {
+    "epochs": 24,
+    "batch_size": 32,
+    "duration_seconds": 2.74080416187644
+  },
+  "metrics": {
+    "evaluation_scope": "grouped_synthetic_holdout",
+    "interpretation": "Unseen seeded synthetic scenario groups only; these metrics do not estimate field generalization.",
+    "accuracy": 1.0,
+    "f1_macro": 1.0,
+    "classification_report": {
+      "healthy": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1-score": 1.0,
+        "support": 8.0
+      },
+      "winding_deformation_suspected": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1-score": 1.0,
+        "support": 8.0
+      },
+      "core_clamping_issue_suspected": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1-score": 1.0,
+        "support": 8.0
+      },
+      "insulation_related_abnormality_suspected": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1-score": 1.0,
+        "support": 8.0
+      },
+      "needs_human_review": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1-score": 1.0,
+        "support": 8.0
+      },
+      "accuracy": 1.0,
+      "macro avg": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1-score": 1.0,
+        "support": 40.0
+      },
+      "weighted avg": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1-score": 1.0,
+        "support": 40.0
+      }
+    },
+    "confusion_matrix": [
+      [
+        8,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        8,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        8,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        8,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        8
+      ]
+    ]
+  },
+  "benchmarks": {
+    "batch_size": 32,
+    "repeats": 50,
+    "cpu_batch_ms": 3.1463842978700995,
+    "amd_gpu_batch_ms": 0.2798780193552375,
+    "speedup": 11.241984294152537
+  },
+  "plots": [
+    "plots/fra_training_curve.png",
+    "plots/fra_confusion_matrix.png"
+  ],
+  "safety_notice": "Synthetic-data decision support only; all findings require qualified engineer confirmation and must never trigger automated control action.",
+  "device_identification": {
+    "source": "amd-smi static --asic --gpu 0",
+    "market_name_raw": "0x744b",
+    "vendor_id": "0x1002",
+    "vendor_name": "Advanced Micro Devices Inc. [AMD/ATI]",
+    "device_id": "0x744b",
+    "compute_units": 96,
+    "target_graphics_version": "gfx1100"
+  }
+}
